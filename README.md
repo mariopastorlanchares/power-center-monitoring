@@ -1,4 +1,4 @@
-# Power Data Center Interfaz con Firebase
+# Power Center Monitoring Firebase
 
 Este programa permite recuperar datos de inversores de potencia y almacenarlos en una base de datos Firebase Realtime
 Database. Está diseñado para ser ejecutado en un dispositivo como una Raspberry Pi, realizando peticiones periódicas a
