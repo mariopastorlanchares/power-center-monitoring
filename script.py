@@ -9,12 +9,13 @@ from firebase_admin import db
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Cargar configuración
+config_path = os.path.join(script_dir, 'config.ini')
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(config_path)
 
 # Configuración de Firebase
 cred_path = os.path.join(script_dir, 'credentials.json')
-cred = credentials.Certificate("credentials.json")
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred, {
     'databaseURL': config['DEFAULT']['FirebaseRealtimeDatabaseUrl']
 })
