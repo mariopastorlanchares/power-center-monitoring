@@ -1,15 +1,19 @@
+import os
 import requests
 import configparser
-import json
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Cargar configuración
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Configuración de Firebase
+cred_path = os.path.join(script_dir, 'credentials.json')
 cred = credentials.Certificate("credentials.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': config['DEFAULT']['FirebaseRealtimeDatabaseUrl']
@@ -17,7 +21,7 @@ firebase_admin.initialize_app(cred, {
 
 serial_nos = config['DEFAULT']['SerialNos'].split(',')
 firebase_user_id = config['DEFAULT']['FirebaseUserId']
-last_timestamp_file = 'last_timestamp.txt'
+last_timestamp_file = os.path.join(script_dir, 'last_timestamp.txt')
 
 # Leer el último timestamp guardado
 try:

@@ -29,6 +29,10 @@ Las dependencias requeridas están listadas en el archivo requirements.txt.
 
 Deberás crear un archivo `config.ini` en el directorio del programa con la siguiente estructura:
 
+```
+nano config.ini
+```
+
 ```ini
 [DEFAULT]
 SerialNos = [Lista de números de serie de los inversores, separados por comas]
@@ -48,6 +52,12 @@ en el directorio del programa. Para obtener este archivo:
 
 Este archivo contiene tus credenciales de administrador de Firebase y debe mantenerse seguro y privado.
 
+```
+nano credentials.json
+```
+
+Copia y pega en el nuevo fichero los datos obtenidos desde Firebase
+
 ## Uso del Programa
 
 Una vez configurado, puedes ejecutar el programa con el siguiente comando:
@@ -56,6 +66,23 @@ Una vez configurado, puedes ejecutar el programa con el siguiente comando:
 python3 script.py
 ```
 
+## Configuración de Ejecución Periódica en Raspberry Pi
+
+Para configurar la ejecución automática del script cada 30 segundos en una Raspberry Pi, utiliza un cron job:
+
+### Configurar Cron Job
+
+1. Abre la terminal y escribe `crontab -e` para editar el crontab del usuario actual.
+2. Añade las siguientes líneas al archivo crontab:
+*Nota: si no usas raspberry tu ruta absoluta será diferente
+
+   ```cron
+   * * * * * /usr/bin/python3 /home/pi/power-center-monitoring/script.py
+    ```
+
+Reemplaza /ruta/a/tu/script.py con la ruta completa a tu script.
+
+Guarda y cierra el archivo. Si estás usando nano, presiona Ctrl + O y luego Ctrl + X.
 El programa realizará peticiones a los inversores especificados en config.ini y almacenará los datos en tu base de datos
 Firebase bajo el FirebaseUserId proporcionado.
 
