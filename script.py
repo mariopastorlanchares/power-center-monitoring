@@ -5,7 +5,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Cargar configuración
@@ -20,9 +19,12 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': config['DEFAULT']['FirebaseRealtimeDatabaseUrl']
 })
 
-serial_nos = config['DEFAULT']['SerialNos'].split(',')
+serial_nos = [serial.strip() for serial in config['DEFAULT']['SerialNos'].split(',')]
 firebase_user_id = config['DEFAULT']['FirebaseUserId']
 last_timestamp_file = os.path.join(script_dir, 'last_timestamp.txt')
+
+# Estructura para acumular datos
+data_received = {}
 
 # Leer el último timestamp guardado
 try:
@@ -50,7 +52,6 @@ for i, serial_no in enumerate(serial_nos, start=1):
 
     if response.status_code == 200:
         data = response.json()
-        timestamp = data.get('time', {}).get('time')
         # Eliminar datos no deseados
         keys_to_remove = [
             'time',
@@ -64,16 +65,22 @@ for i, serial_no in enumerate(serial_nos, start=1):
         ]
         for key in keys_to_remove:
             data.pop(key, None)
+        data_received[serial_no] = data
 
-        if timestamp and str(timestamp) != str(last_timestamp):
-            new_timestamp = timestamp
-            # Guardar datos en Firebase
-            ref = db.reference(f'/{firebase_user_id}/{timestamp}/inverter_{i}')
-            ref.set(data)
-        else:
-            print(f"Datos ya actualizados para el inversor {serial_no}")
-
-# Guardar el nuevo timestamp
-if new_timestamp:
+# Verificar si se recibieron datos para todos los serial_nos
+if all(serial in data_received for serial in serial_nos):
+    # Guardar datos en Firebase
+    for i, serial_no in enumerate(serial_nos, start=1):
+        if serial_no in data_received:
+            data = data_received[serial_no]
+            timestamp = data.get('time', {}).get('time')
+            if timestamp and str(timestamp) != str(last_timestamp):
+                new_timestamp = timestamp
+                ref = db.reference(f'/{firebase_user_id}/{timestamp}/inverter_{i}')
+                ref.set(data)
+            else:
+                print(f"Datos ya actualizados para el inversor {serial_no}")
     with open(last_timestamp_file, 'w') as file:
         file.write(str(new_timestamp))
+else:
+    print("No se recibieron datos para uno o más serial_nos")
