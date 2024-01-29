@@ -83,7 +83,7 @@ if all(serial in data_received for serial in serial_nos):
                 ref = db.reference(f'/{firebase_user_id}/{timestamp}/inverter_{i}')
                 ref.set(data)
                 with open(last_timestamp_file, 'w') as file:
-                    file.write(str(new_timestamp))
+                    file.write(str(timestamp))
             else:
                 print(f"Datos ya actualizados para el inversor {serial_no}")
 
