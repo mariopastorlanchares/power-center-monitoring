@@ -1,4 +1,6 @@
 import os
+import sys
+
 import requests
 import configparser
 import firebase_admin
@@ -54,7 +56,6 @@ for i, serial_no in enumerate(serial_nos, start=1):
         data = response.json()
         # Eliminar datos no deseados
         keys_to_remove = [
-            'time',
             'chargeSource',
             'prodid',
             'workMode',
@@ -66,6 +67,9 @@ for i, serial_no in enumerate(serial_nos, start=1):
         for key in keys_to_remove:
             data.pop(key, None)
         data_received[serial_no] = data
+    else:
+        print(f"Error: Respuesta no exitosa para el serial {serial_no}. Código de estado HTTP: {response.status_code}")
+        sys.exit()
 
 # Verificar si se recibieron datos para todos los serial_nos
 if all(serial in data_received for serial in serial_nos):
@@ -74,13 +78,14 @@ if all(serial in data_received for serial in serial_nos):
         if serial_no in data_received:
             data = data_received[serial_no]
             timestamp = data.get('time', {}).get('time')
+            data.pop('time', None)
             if timestamp and str(timestamp) != str(last_timestamp):
-                new_timestamp = timestamp
                 ref = db.reference(f'/{firebase_user_id}/{timestamp}/inverter_{i}')
                 ref.set(data)
+                with open(last_timestamp_file, 'w') as file:
+                    file.write(str(new_timestamp))
             else:
                 print(f"Datos ya actualizados para el inversor {serial_no}")
-    with open(last_timestamp_file, 'w') as file:
-        file.write(str(new_timestamp))
+
 else:
     print("No se recibieron datos para uno o más serial_nos")
